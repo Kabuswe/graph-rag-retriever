@@ -6,8 +6,7 @@
  * Input:  RagRetrieverInput  (query, clientId, topK, dateRange?, docTypes?, tags?)
  * Output: RagRetrieverOutput (contextWindow, sourceRefs[], chunkCount)
  *
- * TODO: implement nodes under src/nodes/ per PRD.md
- * TODO: import contracts from @kabuswe/graph-contracts once published
+ * Implementation tracked in GitHub issues — see repo Issues tab.
  */
 
 import { StateGraph, START, END, MemorySaver, StateSchema, UntrackedValue } from '@langchain/langgraph';
@@ -41,12 +40,11 @@ const RagState = new StateSchema({
 
 const standardRetry = { maxAttempts: 3, initialInterval: 1000, backoffFactor: 2 };
 
-// TODO: replace with real node implementations
-const embedQueryNode         = async (s: any) => ({ phase: 'embed-query', queryEmbedding: [], mode: process.env.VECTOR_STORE_MODE === 'sqlite' ? 'local' : 'cloud' });
-const queryVectorStoreNode   = async (s: any) => ({ phase: 'query-vector-store', rawChunks: [] });
-const filterByMetadataNode   = async (s: any) => ({ phase: 'filter-metadata', filteredChunks: s.rawChunks });
-const rankChunksNode         = async (s: any) => ({ phase: 'rank-chunks', rankedChunks: s.filteredChunks });
-const formatContextNode      = async (s: any) => ({ phase: 'format-context', contextWindow: '', sourceRefs: [], chunkCount: 0 });
+import { embedQueryNode }       from './nodes/embedQuery.js';
+import { queryVectorStoreNode } from './nodes/queryVectorStore.js';
+import { filterByMetadataNode } from './nodes/filterByMetadata.js';
+import { rankChunksNode }       from './nodes/rankChunks.js';
+import { formatContextNode }    from './nodes/formatContext.js';
 
 function assembleGraph(checkpointer?: MemorySaver) {
   const builder = new StateGraph(RagState)
